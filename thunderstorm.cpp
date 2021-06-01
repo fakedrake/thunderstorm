@@ -197,21 +197,24 @@ class CodeBuffer {
   cursor_t m_code, m_cursor;
 };
 
-#define STRUCT_SIZE (1024 * 32)
 #define MAX_CODEBLOCK_BYTES 40
-#define ELEM_NUM (STRUCT_SIZE / MAX_CODEBLOCK_BYTES)
+
+#define MY_BMARK(x) \
+  BENCHMARK(x)->RangeMultiplier(2)->Range(1024, 1024 * 1024 * 6)
 
 // Linear search though an array of pairs.
 static void BM_array(benchmark::State& state) {
-  std::vector<std::pair<size_t, std::string>> buf(ELEM_NUM);
-  for (int i = 0; i < ELEM_NUM; i++) {
+  srand(42);
+  const size_t elems = state.range(0) / MAX_CODEBLOCK_BYTES;
+  std::vector<std::pair<size_t, std::string>> buf(elems);
+  for (int i = 0; i < elems; i++) {
     buf.emplace_back(i, fmt::format("Number {}", i));
   }
 
   // Linear search
   for (auto _ : state) {
-    size_t lu_val = rand() % ELEM_NUM;
-    for (int i = 0; i < ELEM_NUM; i++) {
+    size_t lu_val = rand() % elems;
+    for (int i = 0; i < elems; i++) {
       if (buf[i].first == lu_val) {
         benchmark::DoNotOptimize(buf[i].second);
         break;
@@ -219,20 +222,24 @@ static void BM_array(benchmark::State& state) {
     }
   }
 }
-BENCHMARK(BM_array);
+MY_BMARK(BM_array);
 
 // Linear search via traversal. The elements are not sequential.
 static void BM_codebuffer(benchmark::State& state) {
-  CodeBuffer buf(STRUCT_SIZE);
-  for (int i = 0; i < ELEM_NUM; i++) {
+  srand(42);
+  const size_t elems = state.range(0) / MAX_CODEBLOCK_BYTES;
+  CodeBuffer buf(state.range(0));
+  for (int i = 0; i < elems; i++) {
     buf.push_cons(i, fmt::format("Number {}", i));
   }
 
   // Perform setup here
   for (auto _ : state) {
-    benchmark::DoNotOptimize(buf.find_cons(rand() % ELEM_NUM)->get_data());
+    benchmark::DoNotOptimize(
+        buf.find_cons(rand() % elems)->get_data());
   }
 }
-BENCHMARK(BM_codebuffer);
+MY_BMARK(BM_codebuffer);
+
 // Run the benchmark
 BENCHMARK_MAIN();
