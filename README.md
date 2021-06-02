@@ -52,3 +52,12 @@ BM_codebuffer/2097152     216900 ns       216889 ns         3177
 BM_codebuffer/4194304     451893 ns       451835 ns         1554
 BM_codebuffer/6291456     753728 ns       753683 ns          832
 ```
+
+## Roadmap
+
+This is the most naive approach. There are a few optimizations that come to mind:
+
+- Cache-align the ends of jumps (might need to pad with multibyte nops)
+- Larger objects being checked for equality would allow us to use SIMD instructions and mitigate the size ratio (at the moment for every 8 byte key + 8byte address to the value we use a total of about 31 bits of instructions. For larger keys we could strike a better ratio.
+- This approach uses the instruction prefetching mechanisms which are unlikely to reach the memory bus capacity. Investigate using prefetch/load instructions to complement.
+- These experiments have a clear boundary between JIT code being driven by normal code. It would be interesting to a graph representation that would allow for extremely fast BFS where the neighbor sets are stored as code that generates frontier fragments if they are not visited. The frontier is a JIT traversal that calls on the frontier fragment generators. Work for each thead must be statically scheduled. 
