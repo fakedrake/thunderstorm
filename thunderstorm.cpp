@@ -10,7 +10,7 @@ typedef unsigned char* cursor_t;
 #define REL_ADDR(instr,target) ((instr) + 1 - (target))
 inline cursor_t op_jmp(cursor_t c, cursor_t target) {
   size_t rel32 = target - &c[5];
-  c[0] = 0xe9;
+  c[0] = 0xe9; // 0xea would be a far jump. near jumps are predicted.
   c[1] = rel32 & 0xff;
   c[2] = (rel32 >> 8) & 0xff;
   c[3] = (rel32 >> 16) & 0xff;
