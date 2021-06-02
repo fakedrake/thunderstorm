@@ -53,6 +53,26 @@ BM_codebuffer/4194304     451893 ns       451835 ns         1554
 BM_codebuffer/6291456     753728 ns       753683 ns          832
 ```
 
+## How to run
+
+**THIS ONLY RUNS ON x86_64**. You will need [nix](https://nixos.org/) to run the benchmarks. You can get it by running
+
+```
+$ curl -L https://nixos.org/nix/install | sh
+```
+
+Once nix is installed
+
+```
+$ nix-shell 
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make
+$ ./thunderstorm
+```
+
+
 ## Roadmap
 
 This is the most naive approach. There are a few optimizations that come to mind:
